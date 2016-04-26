@@ -15,29 +15,33 @@ app.get('/todos', function(req, res) {
 	var query = req.query;
 	var where = {};
 
-	if(query.hasOwnProperty('completed') && query.completed === 'true'){
+	if (query.hasOwnProperty('completed') && query.completed === 'true') {
 		where.completed = true;
 		db.todo.findAll(where);
 	} else if (query.hasOwnProperty('completed') && query.completed === 'false') {
 		where.completed = false;
 	}
 
-	if(query.hasOwnProperty('q') && query.q.length > 0) {
+	if (query.hasOwnProperty('q') && query.q.length > 0) {
 		where.description = {
-			$like : '%' + query.q + '%'
+			$like: '%' + query.q + '%'
 		};
 	}
 
-	db.todo.findAll({where:where}).then(function(todos){
-		if(todos.length > 0){
-			res.json(todos);	
-		}else{
+	db.todo.findAll({
+		where: where
+	}).then(function(todos) {
+		if (todos.length > 0) {
+			res.json(todos);
+		} else {
 			res.status(404).send('Not found');
 		}
-		
-	}, function (e){
-		res.json({err : 'not found'});
-	}); 
+
+	}, function(e) {
+		res.json({
+			err: 'not found'
+		});
+	});
 });
 
 // get /todo/:id
@@ -69,18 +73,19 @@ app.post('/todos', function(req, res) {
 // delete /todos/:id
 app.delete('/todos/:id', function(req, res) {
 	var todoId = parseInt(req.params.id, 10);
-	var matchedTodo = _.findWhere(todos, {
-		id: todoId
+	db.todo.destroy({
+		where: {
+			id: todoId
+		}
+	}).then(function(rowsDeleted) {
+		if(rowsDeleted === 0){
+			res.status(404).json({error: "no to delete with this id"});
+		}else {
+			res.status(204).send();
+		}
+	}, function(e) {
+		res.status(500).send();
 	});
-
-	if (matchedTodo) {
-		matchedTodo = _.without(todos, matchedTodo);
-		res.send("delete successfully");
-	} else {
-		res.status(404).json({
-			"error": "not found"
-		});
-	}
 });
 
 
