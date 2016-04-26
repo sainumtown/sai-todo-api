@@ -12,10 +12,34 @@ app.use(bodyParser.json());
 
 // get /todos?completed=true
 app.get('/todos', function(req, res) {
-	var queryParam = req.query;
-	var filterTodos = todos;
+	var query = req.query;
+	var where = {};
 
-	if (queryParam.hasOwnProperty('completed') && queryParam.completed === 'true') {
+	if(query.hasOwnProperty('completed') && query.completed === 'true'){
+		where.completed = true;
+		db.todo.findAll(where);
+	} else if (query.hasOwnProperty('completed') && query.completed === 'false') {
+		where.completed = false;
+	}
+
+	if(query.hasOwnProperty('q') && query.q.length > 0) {
+		where.description = {
+			$like : '%' + query.q + '%'
+		};
+	}
+
+	db.todo.findAll({where:where}).then(function(todos){
+		if(todos.length > 0){
+			res.json(todos);	
+		}else{
+			res.status(404).send('Not found');
+		}
+		
+	}, function (e){
+		res.json({err : 'not found'});
+	}); 
+
+	/*if (queryParam.hasOwnProperty('completed') && queryParam.completed === 'true') {
 		filterTodos = _.where(filterTodos, {
 			completed: true
 		});
@@ -36,7 +60,7 @@ app.get('/todos', function(req, res) {
 		res.json({
 			error: "not found"
 		});
-	}
+	}*/
 });
 
 // get /todo/:id
