@@ -38,29 +38,6 @@ app.get('/todos', function(req, res) {
 	}, function (e){
 		res.json({err : 'not found'});
 	}); 
-
-	/*if (queryParam.hasOwnProperty('completed') && queryParam.completed === 'true') {
-		filterTodos = _.where(filterTodos, {
-			completed: true
-		});
-	} else if (queryParam.hasOwnProperty('completed') && queryParam.completed === 'false') {
-		filterTodos = _.where(filterTodos, {
-			completed: false
-		});
-	}
-
-	if (queryParam.hasOwnProperty('q') && queryParam.q.length > 0) {
-		filterTodos = _.filter(filterTodos, function(todo) {
-			return todo.description.indexOf(queryParam.q) > -1;
-		});
-	}
-	if (filterTodos.length !== 0) {
-		res.send(filterTodos);
-	} else {
-		res.json({
-			error: "not found"
-		});
-	}*/
 });
 
 // get /todo/:id
