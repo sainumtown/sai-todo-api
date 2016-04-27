@@ -122,7 +122,7 @@ app.put('/todos/:id', function(req, res) {
 app.post('/users',function(req, res){
 	var body = _.pick(req.body, 'email', 'password');
 	db.user.create(body).then(function(user){
-		res.json(user.toJSON());
+		res.json(user.toPublicJSON());
 	},function(e){
 		res.status(400).json(e);
 	});
@@ -131,20 +131,10 @@ app.post('/users',function(req, res){
 // post user login
 app.post('/users/login',function(req,res){
 	var body = _.pick(req.body, 'email', 'password');
-	if(typeof body.email !== 'string' || typeof body.password !== 'string'){
-		res.status(400).send();
-	}
-	db.user.findOne({
-		where:{
-			email:body.email
-		}
-	}).then(function(user){
-		if(!user || user.password !== body.password){
-			return res.status(401).send();
-		}
-		res.json(body);
-	},function(e){
-		res.status(500).send();
+	db.user.authenticate(body).then(function(user){
+		res.json(user);
+	},function(){
+		res.status(401).send();
 	});
 });
 
