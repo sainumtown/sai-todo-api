@@ -15,5 +15,19 @@ module.exports = function(sequelize, DataTypes){
         len:[7,100]
       }
     }
+  },{
+      hooks: {
+        beforeValidate: function(user, options){
+          if(typeof user.email === 'string') {
+            user.email = user.email.toLowerCase();
+          }
+        }
+      },
+      instanceMethods: {
+        toPublicJSON: function(){
+          var json = this.toJSON();
+          return _.pick(json, 'id' , 'email','createdAt','updatedAt');
+        }
+      }
   });
 }
