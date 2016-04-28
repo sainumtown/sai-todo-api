@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 var _ = require('underscore');
 var db = require('./db.js');
 var middleware = require('./middleware.js')(db);
+var cryptojs = require('crypto-js');
 
 var todos = [];
 var todoNextId = 1;
@@ -120,7 +121,7 @@ app.put('/todos/:id',  middleware.requireAuthentication, function(req, res) {
 			userId: req.user.get('id')
 		}
 
-	}).then(function(todo) {
+	}	).then(function(todo) {
 		if (todo) {
 			return todo.update(attributes).then(function(todo) {
 				res.json(todo.toJSON());
@@ -148,16 +149,29 @@ app.post('/users',function(req, res){
 // post user login
 app.post('/users/login',function(req,res){
 	var body = _.pick(req.body, 'email', 'password');
+	var userInstance;
+
 	db.user.authenticate(body).then(function(user){
-		/*res.json(user);*/
-		token =  user.generatedToken('authentication');
-		if(token){
-			res.header('Auth', token).json(user.toPublicJSON());
-		}else{
-			res.status(401).send();
-		}
-	},function(){
+		var	token =  user.generatedToken('authentication');
+		userInstance = user;
+
+		return db.token.create({
+			token:token
+		});
+
+	}).then(function(tokenInstance){
+		res.header('Auth', tokenInstance.get('token')).json(userInstance.toPublicJSON());
+	}).catch (function(){
 		res.status(401).send();
+	});
+});
+
+// DELTE logout user
+app.delete('/users/login',middleware.requireAuthentication,function(req,res){
+	req.token.destroy().then(function(){
+		res.status(204).send();
+	}).catch (function(){
+		res.status('500').send();
 	});
 });
 
