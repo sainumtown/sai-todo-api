@@ -4,14 +4,16 @@ var PORT = process.env.PORT || 3000;
 var bodyParser = require('body-parser');
 var _ = require('underscore');
 var db = require('./db.js');
+var middleware = require('./middleware.js')(db);
 
 var todos = [];
 var todoNextId = 1;
 
+
 app.use(bodyParser.json());
 
 // get /todos?completed=true
-app.get('/todos', function(req, res) {
+app.get('/todos', middleware.requireAuthentication, function(req, res) {
 	var query = req.query;
 	var where = {};
 
@@ -45,7 +47,7 @@ app.get('/todos', function(req, res) {
 });
 
 // get /todo/:id
-app.get('/todos/:id', function(req, res) {
+app.get('/todos/:id', middleware.requireAuthentication, function(req, res) {
 
 	var todoId = parseInt(req.params.id, 10);
 	db.todo.findById(todoId).then(function(todo) {
@@ -135,12 +137,12 @@ app.post('/users/login',function(req,res){
 		/*res.json(user);*/
 		token =  user.generatedToken('authentication');
 		if(token){
-			res.header('Auth', token).json(user.toPublicJSON());	
+			res.header('Auth', token).json(user.toPublicJSON());
 		}else{
 			res.status(401).send();
 		}
-		
-		
+
+
 	},function(){
 		res.status(401).send();
 	});
