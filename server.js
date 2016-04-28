@@ -29,7 +29,6 @@ app.get('/todos', middleware.requireAuthentication, function(req, res) {
 			$like: '%' + query.q + '%'
 		};
 	}
-
 	db.todo.findAll({
 		where: where
 	}).then(function(todos) {
