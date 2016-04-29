@@ -121,7 +121,7 @@ app.put('/todos/:id',  middleware.requireAuthentication, function(req, res) {
 			userId: req.user.get('id')
 		}
 
-	}	).then(function(todo) {
+	}   ).then(function(todo) {
 		if (todo) {
 			return todo.update(attributes).then(function(todo) {
 				res.json(todo.toJSON());
@@ -152,7 +152,7 @@ app.post('/users/login',function(req,res){
 	var userInstance;
 
 	db.user.authenticate(body).then(function(user){
-		var	token =  user.generatedToken('authentication');
+		var token =  user.generatedToken('authentication');
 		userInstance = user;
 
 		return db.token.create({
